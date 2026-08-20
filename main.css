@@ -332,9 +332,10 @@
 
 .product-frame {
   position: relative;
-  width: min(980px, 88vw);
+  width: min(760px, 62vw);
 
   transform:
+    translateX(150px)
     translateY(180px)
     scale(0.72);
 

@@ -272,13 +272,13 @@
           const p = (progress - 0.35) / 0.65;
 
           y = -(p * 80);
-          scale = 1 + (p * 0.04);
+          scale = 1 ;
           opacity = 1;
 
         }
 
         productFrame.style.transform =
-          `translateY(${y}px) scale(${scale})`;
+          `translateX(150px) translateY(${y}px) scale(${scale})`;
 
         productFrame.style.opacity = opacity;
 
