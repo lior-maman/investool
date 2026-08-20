@@ -48,6 +48,37 @@
     </div>
   </div>
 
+  <section class="product-showcase">
+    <div class="product-stage">
+
+      <div class="product-copy product-copy-left">
+        <span>01</span>
+        <h2>See the signal.</h2>
+        <p>
+          Unusual activity, breakouts and volatility —
+          surfaced before you have to look for them.
+        </p>
+      </div>
+
+      <div class="product-frame">
+        <div class="product-browser">
+          <div class="browser-bar">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <img
+            src="images/quiet-watch.png"
+            alt="Investool Quiet Watch market scanner"
+          />
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
   <section id="signals">
     <div class="wrap">
       <p class="sec-label reveal">The Signals</p>
@@ -181,6 +212,124 @@
         const domain = 'gmail.com';
         window.location.href = `mailto:${user}@${domain}`;
       });
+    }
+
+        /* =====================================================
+       PRODUCT SCROLL ANIMATION
+       ===================================================== */
+
+    const productSection = document.querySelector('.product-showcase');
+    const productFrame = document.querySelector('.product-frame');
+    const productCopy = document.querySelector('.product-copy');
+
+    if (productSection && productFrame) {
+
+      function updateProductAnimation() {
+
+        const rect = productSection.getBoundingClientRect();
+        const sectionHeight = productSection.offsetHeight;
+        const viewportHeight = window.innerHeight;
+
+        /*
+         * Progress:
+         * 0 = beginning of section
+         * 1 = end of section
+         */
+
+        const total = sectionHeight - viewportHeight;
+
+        let progress = -rect.top / total;
+
+        progress = Math.max(0, Math.min(1, progress));
+
+
+        /* -----------------------------------------------
+           PRODUCT
+           ----------------------------------------------- */
+
+        let y;
+        let scale;
+        let opacity;
+
+        if (progress < 0.35) {
+
+          /*
+           * Product enters
+           */
+
+          const p = progress / 0.35;
+
+          y = 180 - (180 * p);
+          scale = 0.72 + (0.28 * p);
+          opacity = p;
+
+        } else {
+
+          /*
+           * Product settles
+           */
+
+          const p = (progress - 0.35) / 0.65;
+
+          y = -(p * 80);
+          scale = 1 + (p * 0.04);
+          opacity = 1;
+
+        }
+
+        productFrame.style.transform =
+          `translateY(${y}px) scale(${scale})`;
+
+        productFrame.style.opacity = opacity;
+
+
+        /* -----------------------------------------------
+           COPY
+           ----------------------------------------------- */
+
+        if (productCopy) {
+
+          if (progress < 0.25) {
+
+            productCopy.style.opacity = 0;
+
+          } else if (progress < 0.55) {
+
+            const p = (progress - 0.25) / 0.30;
+
+            productCopy.style.opacity = p;
+
+            productCopy.style.transform =
+              `translateY(${40 - (40 * p)}px)`;
+
+          } else {
+
+            productCopy.style.opacity = 1;
+
+            productCopy.style.transform =
+              'translateY(0)';
+
+          }
+        }
+      }
+
+
+      /*
+       * Run on scroll
+       */
+
+      window.addEventListener(
+        'scroll',
+        updateProductAnimation,
+        { passive: true }
+      );
+
+
+      /*
+       * Initial state
+       */
+
+      updateProductAnimation();
     }
   </script>
 </body>
