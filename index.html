@@ -37,6 +37,57 @@
     transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
+  /* ---- Live watch table (demo values, real tickers, driven by the dial) ---- */
+  .watch-table {
+    margin-top: 22px;
+    max-width: 560px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--surface);
+    font-family: var(--font-mono);
+  }
+  .watch-head, .watch-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.7fr 0.9fr;
+    gap: 8px;
+    padding: 13px 20px;
+    align-items: center;
+  }
+  .watch-head {
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  /* Fixed body + row heights keep the table from jumping between swaps (no flicker). */
+  .watch-body { min-height: 208px; }
+  .watch-row {
+    font-size: 0.84rem;
+    min-height: 52px;
+    border-bottom: 1px solid var(--border);
+    transition: opacity 0.35s ease;
+  }
+  .watch-row:last-child { border-bottom: none; }
+  .watch-row .tkr { color: var(--text); font-weight: 600; letter-spacing: 0.04em; }
+  .watch-row .last.up   { color: var(--green); }
+  .watch-row .last.down { color: var(--red); }
+  .watch-row .score { color: var(--muted-2); }
+  .watch-row .call { font-size: 0.66rem; letter-spacing: 0.1em; }
+  .watch-row .call.buy   { color: var(--green); }
+  .watch-row .call.watch { color: var(--yellow); }
+  .watch-row .call.skip  { color: var(--muted); }
+  .watch-body.swapping .watch-row { opacity: 0; }
+
+  @media (max-width: 760px) {
+    .watch-table { max-width: 100%; }
+    .watch-head, .watch-row { padding: 10px 14px; gap: 6px; }
+    .watch-row { font-size: 0.74rem; min-height: 46px; }
+    .watch-body { min-height: 184px; }
+  }
+
   /* ---- Scroll reveal ---- */
   .reveal-spacer { height: 12vh; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; }
   .reveal-cue {
@@ -44,7 +95,7 @@
     text-transform: uppercase; color: var(--muted); opacity: 0.7;
   }
   .reveal-showcase {
-    position: relative; height: 180vh; border-bottom: 1px solid var(--border);
+    position: relative; height: 220vh; border-bottom: 1px solid var(--border);
   }
   .reveal-stage {
     position: sticky; top: 0; height: 100vh;
@@ -111,7 +162,7 @@
   }
 
   @media (max-width: 760px) {
-    .reveal-showcase { height: 150vh; }
+    .reveal-showcase { height: 180vh; }
     .reveal-frame { width: 92vw; transform: translateY(120px) scale(0.92); filter: blur(6px); }
     .frame-overlay { opacity: 1; }              /* no hover on touch — show the CTA hint */
     .frame-overlay .cta { transform: translateY(0); }
@@ -256,6 +307,14 @@
         <span class="sector-chip">Machines</span>
       </div>
       <div class="dial-rail"><span class="dial-fill" id="dialFill"></span></div>
+
+      <!-- Live watch table — real tickers (config.py), demo values, cycles with the dial -->
+      <div class="watch-table" id="watchTable" aria-live="polite">
+        <div class="watch-head">
+          <span>Ticker</span><span>Last</span><span>Score</span><span>Call</span>
+        </div>
+        <div class="watch-body" id="watchBody"></div>
+      </div>
     </div>
   </section>
 
@@ -420,6 +479,7 @@
 
     /* =====================================================
        SECTOR DIAL — auto-cycles the chips, hover to hold
+       (now also drives the demo watch table below)
        ===================================================== */
     (function () {
       const rail = document.getElementById('sectors');
@@ -427,8 +487,56 @@
       const chips = Array.from(rail.querySelectorAll('.sector-chip'));
       if (!chips.length) return;
       const fill = document.getElementById('dialFill');
+      const body = document.getElementById('watchBody');
       const STEP = 1400; // ms per sector — tweak to taste
       let index = 0, timer = null, paused = false, onScreen = false;
+
+      // 4 leading tickers per sector — pulled from config.py (real symbols).
+      // Keys are UPPERCASE; the chip label is normalized before lookup.
+      const DATA = {
+        WARTIME:['LMT','RTX','NOC','GD'],
+        HEALTH:['JNJ','LLY','NVO','PFE'],
+        BIOTECH:['VRTX','REGN','MRNA','AMGN'],
+        'AI POWER':['SMCI','VRT','DELL','ANET'],
+        INDUSTRIALS:['CAT','DE','ETN','HON'],
+        'TECH + AI':['AAPL','MSFT','AMZN','META'],
+        FINTECH:['V','MA','PYPL','FIS'],
+        CYBER:['CRWD','PANW','ZS','FTNT'],
+        QUANTUM:['QUBT','RGTI','IONQ','QBTS'],
+        ENERGY:['CVX','COP','EOG','HAL'],
+        CHIPS:['NVDA','AMD','INTC','AVGO'],
+        SPACE:['RKLB','ASTS','LUNR','RDW'],
+        METALS:['GLD','SLV','GDX','NEM'],
+        CONSUMER:['BKNG','WMT','COST','HD'],
+        MACHINES:['TER','NVMI','ZBRA','NDSN']
+      };
+      const CALLS = ['buy','watch','skip'];
+      // Deterministic pseudo-values so a ticker always reads the same (demo only).
+      function makeRow(sym, seed) {
+        const h = [...sym].reduce((a,c)=>a+c.charCodeAt(0),0) + seed;
+        const last = (40 + (h % 400) + (h % 100)/100).toFixed(2);
+        const up = h % 2 === 0;
+        const score = 30 + (h % 60);
+        const call = CALLS[h % 3];
+        return { sym, last, up, score, call };
+      }
+      function renderTable() {
+        if (!body) return;
+        const sector = chips[index].textContent.trim().toUpperCase();
+        const syms = DATA[sector] || ['—','—','—','—'];
+        body.classList.add('swapping');
+        const rows = syms.map((s, i) => {
+          if (s === '—') return `<div class="watch-row"><span class="tkr">—</span><span></span><span></span><span></span></div>`;
+          const r = makeRow(s, index * 7 + i);
+          return `<div class="watch-row">
+            <span class="tkr">${r.sym}</span>
+            <span class="last ${r.up ? 'up' : 'down'}">${r.last}</span>
+            <span class="score">${r.score}</span>
+            <span class="call ${r.call}">${r.call.toUpperCase()}</span>
+          </div>`;
+        }).join('');
+        setTimeout(() => { body.innerHTML = rows; body.classList.remove('swapping'); }, 180);
+      }
 
       function paint() {
         chips.forEach((chip, i) => {
@@ -438,6 +546,7 @@
           chip.classList.toggle('is-near', near && i !== index);
         });
         if (fill) fill.style.width = (((index + 1) / chips.length) * 100).toFixed(2) + '%';
+        renderTable();
       }
       function advance() { index = (index + 1) % chips.length; paint(); }
       function start() { if (!timer) timer = setInterval(() => { if (!paused && onScreen) advance(); }, STEP); }
@@ -491,16 +600,18 @@
         label.style.opacity = l;
         label.style.transform = `translateY(${(1 - l) * 14}px)`;
 
+        // Match the first showcase: gradual entry over the first 35% of scroll
+        // (linear opacity, eased travel), then a gentle settle over the rest.
         let y, scale, opacity, blur;
-        if (progress < 0.5) {
-          const p = progress / 0.5;
-          const e = 1 - Math.pow(1 - p, 3);   // easeOutCubic
+        if (progress < 0.35) {
+          const p = progress / 0.35;                 // 0 → 1 across entry
+          const e = 1 - Math.pow(1 - p, 2);          // easeOutQuad — softer start than cubic
           y = START_Y - (START_Y * e);
           scale = START_S + ((1 - START_S) * e);
-          opacity = clamp(e * 1.4, 0, 1);
+          opacity = p;                               // linear fade-in, no sudden pop
           blur = START_BLR - (START_BLR * e);
         } else {
-          const p = (progress - 0.5) / 0.5;
+          const p = (progress - 0.35) / 0.65;
           y = -(p * (mob ? 20 : 40)); scale = 1; opacity = 1; blur = 0;
         }
         frame.style.transform = `translateY(${y}px) scale(${scale})`;
@@ -513,8 +624,7 @@
           scan.style.transform = `translateY(${p * frame.offsetHeight}px)`;
         } else {
           scan.style.opacity = 0;
-        }
-      }
+        }      }
 
       window.addEventListener('scroll', updateReveal, { passive: true });
       window.addEventListener('resize', updateReveal);
