@@ -442,8 +442,9 @@
 /* ---------------------------------------------------------
    Mobile
    --------------------------------------------------------- */
-
 @media (max-width: 760px) {
+
+  .topbar-cta { display: none; }
 
   .product-showcase {
     height: 180vh;
@@ -454,10 +455,18 @@
   }
 
   .product-copy {
-    display: none;
+    position: static;        /* חזרה לזרימה במקום absolute */
+    width: 100%;
+    max-width: 94vw;
+    margin: 0 auto 24px;     /* מרכוז אופקי של הבלוק עצמו */
+    text-align: right;       /* יישור הטקסט לימין */
+    opacity: 1 !important;   /* גובר על אנימציית הסקרול שמסתירה במובייל */
+    transform: none !important;
   }
 
 }
+
+
   @media print {
     .reveal { opacity: 1; transform: none; }
     body { background: #fff; color: #000; }
