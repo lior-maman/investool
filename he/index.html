@@ -1,41 +1,26 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="he" dir="rtl" data-theme="light">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Investool</title>
-<meta name="description" content="Investool — a live market scanner for unusual volume, fresh breakouts, and market-wide fear across fifteen curated sectors." />
+<title>Investool — סורק שוק חי</title>
+<meta name="description" content="Investool — סורק שוק חי לוולום חריג, פריצות טריות ופחד רוחבי בשוק, על פני חמישה־עשר סקטורים מובחרים, מדורגים כך שהאות מוצא אותך." />
 <meta name="theme-color" content="#F7F6F3" id="theme-color-meta" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="main.css">
 
 <!-- =========================================================
-     ADDED STYLES — sector dial + scroll reveal.
-     Reuses your existing main.css classes (.product-browser,
-     .browser-bar, .btn-primary tokens) — no duplicated chrome.
+     ADDED STYLES — sector dial + scroll reveal (RTL).
+     Mirrors the English page; reuses .product-browser,
+     .browser-bar, .btn-primary tokens from main.css.
      ========================================================= -->
 <style>
-  /* ---- Language switch button (עב / EN) ---- */
-  .lang-switch {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    color: var(--muted-2);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 0 12px;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
-  }
-  .lang-switch:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-fill); }
-
   /* ---- Sector dial (auto-cycling chips) ---- */
   .sector-chip {
     cursor: default;
+    direction: ltr;                    /* sector names stay latin */
     transition: border-color 0.35s ease, color 0.35s ease, background 0.35s ease,
                 transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
   }
@@ -44,7 +29,7 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 22px var(--accent-fill), 0 2px 8px rgba(0,0,0,0.18);
   }
-  .sector-chip.is-near { color: var(--accent); background: var(--accent-fill); } /* no border */
+  .sector-chip.is-near { color: var(--accent); background: var(--accent-fill); }
 
   .dial-rail {
     margin-top: 26px; height: 2px; width: 100%;
@@ -74,9 +59,10 @@
     align-items: center;
   }
   .watch-head {
-    font-size: 0.6rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-size: 0.68rem;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: 0;
     color: var(--muted);
     border-bottom: 1px solid var(--border);
     background: var(--surface-2);
@@ -88,6 +74,8 @@
     min-height: 52px;
     border-bottom: 1px solid var(--border);
     transition: opacity 0.35s ease;
+    direction: ltr;                    /* tickers + numbers stay LTR */
+    text-align: right;
   }
   .watch-row:last-child { border-bottom: none; }
   .watch-row .tkr { color: var(--text); font-weight: 600; letter-spacing: 0.04em; }
@@ -110,8 +98,8 @@
   /* ---- Scroll reveal ---- */
   .reveal-spacer { height: 12vh; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; }
   .reveal-cue {
-    font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted); opacity: 0.7;
+    font-family: var(--font-sans); font-size: 0.8rem; letter-spacing: 0;
+    color: var(--muted); opacity: 0.7;
   }
   .reveal-showcase {
     position: relative; height: 220vh; border-bottom: 1px solid var(--border);
@@ -122,8 +110,8 @@
     overflow: hidden;
   }
   .reveal-label {
-    font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--accent);
+    font-family: var(--font-sans); font-size: 0.82rem; font-weight: 600; letter-spacing: 0;
+    color: var(--accent);
     margin-bottom: 22px; opacity: 0; will-change: opacity, transform;
   }
   .reveal-frame {
@@ -132,15 +120,15 @@
     opacity: 0; filter: blur(14px);
     will-change: transform, opacity, filter;
   }
-  /* The reveal reuses .product-browser + .browser-bar from main.css. */
 
-  /* ---- Clickable frame + "Open live" overlay (shared) ---- */
+  /* ---- Clickable frame + "LIVE" overlay (bottom-left, RTL keeps it left) ---- */
   .frame-link { display: block; color: inherit; text-decoration: none; }
   .frame-overlay {
     position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: flex-start;
     padding: 18px; opacity: 0; pointer-events: none;
     background: linear-gradient(to top, rgba(10,10,10,0.55), transparent 45%);
     transition: opacity 0.3s ease;
+    direction: ltr;
   }
   .frame-link:hover .frame-overlay { opacity: 1; }
   .frame-overlay .cta {
@@ -151,11 +139,10 @@
   }
   .frame-link:hover .frame-overlay .cta { transform: translateY(0); }
 
-  /* Fallback so the frame always has real height even if the image is missing.
-     Auto-hidden by JS the moment your real screenshot loads. */
+  /* Fallback so the frame always has real height even if the image is missing. */
   .dash-placeholder {
     aspect-ratio: 16 / 10; background: linear-gradient(135deg, #0d0d0d, #151515);
-    display: grid; grid-template-columns: 150px 1fr; gap: 1px;
+    display: grid; grid-template-columns: 150px 1fr; gap: 1px; direction: ltr;
   }
   .dash-placeholder .side { background: #101010; padding: 18px 14px; }
   .dash-placeholder .main { background: #0b0b0b; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
@@ -183,7 +170,7 @@
   @media (max-width: 760px) {
     .reveal-showcase { height: 180vh; }
     .reveal-frame { width: 92vw; transform: translateY(120px) scale(0.92); filter: blur(6px); }
-    .frame-overlay { opacity: 1; }              /* no hover on touch — show the CTA hint */
+    .frame-overlay { opacity: 1; }
     .frame-overlay .cta { transform: translateY(0); }
   }
 </style>
@@ -193,7 +180,7 @@
     <div class="topbar">
       <div class="brand">INVEST<span class="dot">•</span>TOOL</div>
       <div class="topbar-right">
-        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle light / dark">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="החלפת ערכת צבעים" title="בהיר / כהה">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
@@ -202,28 +189,28 @@
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
           </svg>
         </button>
-        <a class="lang-switch" href="he/index.html" lang="he" aria-label="מעבר לעברית" title="עברית">עב</a>
-        <a class="topbar-cta" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer">Live Demo →</a>
+        <a class="lang-switch" href="../index.html" aria-label="Switch to English" title="English">EN</a>
+        <a class="topbar-cta" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer">דמו חי ←</a>
       </div>
     </div>
   </div>
 
   <div class="wrap">
     <div class="hero">
-      <p class="eyebrow">Market Signals, Decoded</p>
-      <h1>Read the market <span class="fade">before the crowd.</span></h1>
-      <p class="lead">A live market scanner for unusual volume, fresh breakouts, and market-wide fear — across fifteen curated sectors, scored and ranked so the signal finds you.</p>
+      <p class="eyebrow">אותות שוק, מפוענחים</p>
+      <h1>לקרוא את השוק <span class="fade">לפני כולם.</span></h1>
+      <p class="lead">סורק שוק חי לוולום חריג, פריצות טריות ופחד רוחבי בשוק — על פני חמישה־עשר סקטורים מובחרים, מדורגים כך שהאות מוצא אותך.</p>
       <div class="hero-actions">
-        <a class="btn-primary" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer">Try the Live Demo</a>
-        <a class="btn-ghost" href="#signals">See the signals ↓</a>
+        <a class="btn-primary" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer">נסו את הדמו החי</a>
+        <a class="btn-ghost" href="#signals">לצפייה באותות ↓</a>
       </div>
       <div class="tagstrip">
-        <span class="tag">RVOL Scanner</span>
-        <span class="tag">30-Day Breakouts</span>
-        <span class="tag">Fear Index</span>
-        <span class="tag">Stock &amp; Market Scores</span>
-        <span class="tag">SEC Filings</span>
-        <span class="tag">Daily Telegram Alerts</span>
+        <span class="tag">סורק RVOL</span>
+        <span class="tag">פריצות 30 יום</span>
+        <span class="tag">מדד פחד</span>
+        <span class="tag">ציוני מניה ושוק</span>
+        <span class="tag">דיווחי SEC</span>
+        <span class="tag">התראות טלגרם יומיות</span>
       </div>
     </div>
   </div>
@@ -233,15 +220,15 @@
 
       <div class="product-copy product-copy-left">
         <span>01</span>
-        <h2>See the signal.</h2>
+        <h2>לראות את האות.</h2>
         <p>
-          Unusual activity, breakouts and volatility —
-          surfaced before you have to look for them.
+          פעילות חריגה, פריצות ותנודתיות —
+          צפות אליך עוד לפני שאתם צריכים לחפש אותן.
         </p>
       </div>
 
       <div class="product-frame">
-        <a class="frame-link" href="https://financial-dashboard-1058721809048.me-west1.run.app/watch" target="_blank" rel="noreferrer" aria-label="Open the live Investool watch view">
+        <a class="frame-link" href="https://financial-dashboard-1058721809048.me-west1.run.app/watch" target="_blank" rel="noreferrer" aria-label="פתיחת מסך המעקב החי של Investool">
         <div class="product-browser">
           <div class="browser-bar">
             <span></span>
@@ -250,8 +237,8 @@
           </div>
 
           <img
-            src="images/quiet-watch.png"
-            alt="Investool Quiet Watch market scanner"
+            src="../images/quiet-watch.png"
+            alt="סורק השוק Quiet Watch של Investool"
           />
           <div class="frame-overlay"><span class="cta">LIVE →</span></div>
         </div>
@@ -264,35 +251,35 @@
 
   <section id="signals">
     <div class="wrap">
-      <p class="sec-label reveal">The Signals</p>
-      <h2 class="sec-title reveal">Six reads on every ticker, one glance.</h2>
-      <p class="sec-sub reveal">Each signal is computed against real market data and ranked hottest-first — no noise, just what moved.</p>
+      <p class="sec-label reveal">האותות</p>
+      <h2 class="sec-title reveal">שישה קריאות על כל טיקר, במבט אחד.</h2>
+      <p class="sec-sub reveal">כל אות מחושב מול נתוני שוק אמיתיים ומדורג מהחם ביותר — בלי הצפה, רק מה שזז.</p>
       <div class="grid">
-        <div class="cell reveal"><p class="cell-num">01</p><h3>Volume Scanner</h3><p>Relative volume flags unusual activity the moment it happens, ranked hottest-first across the whole sector.</p></div>
-        <div class="cell reveal"><p class="cell-num">02</p><h3>Breakout 30D</h3><p>Spots stocks closing above their 30-day high, with exactly how far above the line they broke.</p></div>
-        <div class="cell reveal"><p class="cell-num">03</p><h3>Fear &amp; Trend Gauges</h3><p>Reads the VIX, the dollar, and the S&amp;P's trend — each scored 1 to 10, all in one glance.</p></div>
-        <div class="cell reveal"><p class="cell-num">04</p><h3>Breakout Quality</h3><p>Scores the setup 1 to 10 by blending volatility compression, RSI, MACD and volume into one clean read.</p></div>
-        <div class="cell reveal"><p class="cell-num">05</p><h3>Volatility</h3><p>Ranks today's ATR against its own trailing year, so calm or extreme reads the same on any ticker.</p></div>
-        <div class="cell reveal"><p class="cell-num">06</p><h3>Auto Analysis</h3><p>Reads volume and breakout together into one call — flagging the strongest combined signal, plus market fear.</p></div>
+        <div class="cell reveal"><p class="cell-num">01</p><h3>סורק וולום</h3><p>וולום יחסי מסמן פעילות חריגה ברגע שהיא קורית, מדורג מהחם ביותר על פני כל הסקטור.</p></div>
+        <div class="cell reveal"><p class="cell-num">02</p><h3>פריצה 30 יום</h3><p>מזהה מניות שנסגרות מעל השיא של 30 הימים האחרונים, עם בדיוק כמה מעל הקו הן פרצו.</p></div>
+        <div class="cell reveal"><p class="cell-num">03</p><h3>מדדי פחד ומגמה</h3><p>קורא את ה-VIX, את הדולר ואת מגמת ה-S&amp;P — כל אחד מדורג 1 עד 10, הכול במבט אחד.</p></div>
+        <div class="cell reveal"><p class="cell-num">04</p><h3>איכות פריצה</h3><p>מדרג את הסטאפ 1 עד 10 בשילוב דחיסת תנודתיות, RSI, MACD ווולום לכדי קריאה נקייה אחת.</p></div>
+        <div class="cell reveal"><p class="cell-num">05</p><h3>תנודתיות</h3><p>מדרג את ה-ATR של היום מול השנה החולפת שלו, כך שרוגע או קיצוניות נקראים אותו דבר בכל טיקר.</p></div>
+        <div class="cell reveal"><p class="cell-num">06</p><h3>ניתוח אוטומטי</h3><p>קורא וולום ופריצה יחד לכדי קריאה אחת — מסמן את האות המשולב החזק ביותר, בתוספת פחד השוק.</p></div>
       </div>
     </div>
   </section>
 
   <section>
     <div class="wrap">
-      <p class="sec-label reveal">Two Scores, One Verdict</p>
-      <h2 class="sec-title reveal">The stock and the market, scored separately.</h2>
-      <p class="sec-sub reveal">A great setup in a fearful market is a different story from the same setup when the tape is calm. Investool keeps them apart, then calls it.</p>
+      <p class="sec-label reveal">שני ציונים, פסק דין אחד</p>
+      <h2 class="sec-title reveal">המניה והשוק, מדורגים בנפרד.</h2>
+      <p class="sec-sub reveal">סטאפ מצוין בשוק מפוחד הוא סיפור שונה מאותו סטאפ כשהשוק רגוע. Investool מפריד ביניהם, ואז פוסק.</p>
       <div class="score-row">
         <div class="score-card reveal">
-          <span class="badge stock">Stock Score</span>
-          <h3>How strong is this setup?</h3>
-          <p>Breakout quality and volatility, blended into a single 0–100 read for the individual ticker.</p>
+          <span class="badge stock">ציון מניה</span>
+          <h3>עד כמה הסטאפ הזה חזק?</h3>
+          <p>איכות פריצה ותנודתיות, ממוזגות לקריאה אחת 0–100 עבור הטיקר הבודד.</p>
         </div>
         <div class="score-card reveal">
-          <span class="badge market">Market Score</span>
-          <h3>Is it even the day to enter?</h3>
-          <p>Fear, dollar strength and the S&amp;P trend, blended into a 0–100 read for the whole market.</p>
+          <span class="badge market">ציון שוק</span>
+          <h3>האם זה בכלל היום להיכנס?</h3>
+          <p>פחד, חוזק הדולר ומגמת ה-S&amp;P, ממוזגים לקריאה 0–100 עבור השוק כולו.</p>
         </div>
       </div>
       <div class="verdicts reveal" style="margin-top:24px;">
@@ -300,15 +287,15 @@
         <span class="verdict watch">WATCH</span>
         <span class="verdict skip">SKIP</span>
       </div>
-      <p class="sectors-note reveal">Every candidate lands on one verdict — strong signal in a healthy market, worth watching, or skip.</p>
+      <p class="sectors-note reveal">כל מועמד נוחת על פסק דין אחד — אות חזק בשוק בריא, שווה מעקב, או דילוג.</p>
     </div>
   </section>
 
   <section>
     <div class="wrap">
-      <p class="sec-label reveal">Fifteen Sectors, One Dial</p>
-      <h2 class="sec-title reveal">Focused watchlists, not the noise.</h2>
-      <p class="sec-sub reveal">From AI and defense to biotech and metals — each sector is a curated basket. Turn one dial to move between all fifteen, and land on any stock to see its latest SEC filings, pulled straight from EDGAR in plain English.</p>
+      <p class="sec-label reveal">חמישה־עשר סקטורים, חוגה אחת</p>
+      <h2 class="sec-title reveal">רשימות מעקב ממוקדות, לא הצפת מידע.</h2>
+      <p class="sec-sub reveal">מבינה מלאכותית והגנה ועד ביוטק ומתכות — כל סקטור הוא סל מובחר. סובבו חוגה אחת כדי לנוע בין כל החמישה־עשר, ונחתו על כל מניה כדי לראות את דיווחי ה-SEC האחרונים שלה, נשלפים ישירות מ-EDGAR באנגלית פשוטה.</p>
       <div class="sectors" id="sectors">
         <span class="sector-chip">Wartime</span>
         <span class="sector-chip">Health</span>
@@ -331,7 +318,7 @@
       <!-- Live watch table — real tickers (config.py), demo values, cycles with the dial -->
       <div class="watch-table" id="watchTable" aria-live="polite">
         <div class="watch-head">
-          <span>Ticker</span><span>Last</span><span>Score</span><span>Call</span>
+          <span>טיקר</span><span>אחרון</span><span>ציון</span><span>פסיקה</span>
         </div>
         <div class="watch-body" id="watchBody"></div>
       </div>
@@ -341,19 +328,19 @@
   <!-- =========================================================
        SCROLL REVEAL — the dashboard emerges as you scroll.
        ========================================================= -->
-  <div class="reveal-spacer"><span class="reveal-cue">Scroll ↓</span></div>
+  <div class="reveal-spacer"><span class="reveal-cue">גלילה ↓</span></div>
 
   <section class="reveal-showcase">
     <div class="reveal-stage">
-      <p class="reveal-label" id="revealLabel">Live Dashboard</p>
+      <p class="reveal-label" id="revealLabel">דשבורד חי</p>
       <div class="reveal-frame" id="revealFrame">
-        <a class="frame-link" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer" aria-label="Open the live Investool dashboard">
+        <a class="frame-link" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer" aria-label="פתיחת הדשבורד החי של Investool">
         <div class="product-browser">
           <div class="browser-bar">
             <span></span><span></span><span></span>
           </div>
 
-          <img id="dashImg" src="images/invest.png" alt="Investool market scanner dashboard" />
+          <img id="dashImg" src="../images/invest.png" alt="דשבורד סורק השוק של Investool" />
 
           <div class="dash-placeholder" id="dashPlaceholder">
             <div class="side">
@@ -380,9 +367,9 @@
 
   <section style="border-bottom:none;">
     <div class="wrap cta-band">
-      <h2 class="reveal">See the signals live.</h2>
-      <p class="reveal">Pick a sector, turn the dial, and watch the scanners update against real market data.</p>
-      <a class="btn-primary reveal" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer">Launch Investool</a>
+      <h2 class="reveal">לראות את האותות בשידור חי.</h2>
+      <p class="reveal">בחרו סקטור, סובבו את החוגה, וצפו בסורקים מתעדכנים מול נתוני שוק אמיתיים.</p>
+      <a class="btn-primary reveal" href="https://financial-dashboard-1058721809048.me-west1.run.app/" target="_blank" rel="noreferrer">להשקת Investool</a>
     </div>
   </section>
 
@@ -391,14 +378,14 @@
       <div class="foot-inner">
         <div class="brand">INVEST<span class="dot">•</span>TOOL</div>
         <div class="foot-links">
-          <a href="https://lior-maman.github.io/projects/en" target="_blank" rel="noreferrer">Projects</a>
+          <a href="https://lior-maman.github.io/projects/en" target="_blank" rel="noreferrer">פרויקטים</a>
           <a href="https://linkedin.com/in/lior-maman" target="_blank" rel="noreferrer">LinkedIn</a>
           <a href="https://x.com/liormman?s=11" target="_blank" rel="noreferrer">X</a>
-          <a id="contact-link">Contact</a>
+          <a id="contact-link">צור קשר</a>
         </div>
       </div>
-      <p class="disclaimer">For informational and educational purposes only. Not investment advice. Market data is delayed. Signals are not recommendations to buy or sell any security.</p>
-      <p class="copyright">© 2026 · Built by Lior Maman</p>
+      <p class="disclaimer">למטרות מידע וחינוך בלבד. אין זה ייעוץ השקעות. נתוני השוק מושהים. האותות אינם המלצה לקנות או למכור נייר ערך כלשהו.</p>
+      <p class="copyright">© 2026 · נבנה על ידי ליאור ממן</p>
     </div>
   </footer>
 
@@ -447,7 +434,8 @@
     }
 
     /* =====================================================
-       PRODUCT SCROLL ANIMATION (your original)
+       PRODUCT SCROLL ANIMATION — RTL: copy on the right,
+       frame slides in from the left (translateX -150).
        ===================================================== */
     const productSection = document.querySelector('.product-showcase');
     const productFrame = document.querySelector('.product-frame');
@@ -476,7 +464,7 @@
         }
 
         productFrame.style.transform =
-          `translateX(150px) translateY(${y}px) scale(${scale})`;
+          `translateX(-150px) translateY(${y}px) scale(${scale})`;
         productFrame.style.opacity = opacity;
 
         if (productCopy) {
@@ -499,7 +487,8 @@
 
     /* =====================================================
        SECTOR DIAL — auto-cycles the chips, hover to hold
-       (now also drives the demo watch table below)
+       (also drives the demo watch table below).
+       Sector names stay English, so DATA lookup is unchanged.
        ===================================================== */
     (function () {
       const rail = document.getElementById('sectors');
@@ -508,11 +497,10 @@
       if (!chips.length) return;
       const fill = document.getElementById('dialFill');
       const body = document.getElementById('watchBody');
-      const STEP = 1400; // ms per sector — tweak to taste
+      const STEP = 1400; // ms per sector
       let index = 0, timer = null, paused = false, onScreen = false;
 
       // 4 leading tickers per sector — pulled from config.py (real symbols).
-      // Keys are UPPERCASE; the chip label is normalized before lookup.
       const DATA = {
         WARTIME:['LMT','RTX','NOC','GD'],
         HEALTH:['JNJ','LLY','NVO','PFE'],
@@ -531,7 +519,6 @@
         MACHINES:['TER','NVMI','ZBRA','NDSN']
       };
       const CALLS = ['buy','watch','skip'];
-      // Deterministic pseudo-values so a ticker always reads the same (demo only).
       function makeRow(sym, seed) {
         const h = [...sym].reduce((a,c)=>a+c.charCodeAt(0),0) + seed;
         const last = (40 + (h % 400) + (h % 100)/100).toFixed(2);
@@ -610,7 +597,6 @@
         const total = showcase.offsetHeight - window.innerHeight;
         const progress = clamp(-rect.top / total, 0, 1);
 
-        // Softer motion on small screens: shorter travel, less blur/scale.
         const mob = isMobile();
         const START_Y   = mob ? 120 : 220;
         const START_S   = mob ? 0.92 : 0.82;
@@ -620,15 +606,13 @@
         label.style.opacity = l;
         label.style.transform = `translateY(${(1 - l) * 14}px)`;
 
-        // Match the first showcase: gradual entry over the first 35% of scroll
-        // (linear opacity, eased travel), then a gentle settle over the rest.
         let y, scale, opacity, blur;
         if (progress < 0.35) {
-          const p = progress / 0.35;                 // 0 → 1 across entry
-          const e = 1 - Math.pow(1 - p, 2);          // easeOutQuad — softer start than cubic
+          const p = progress / 0.35;
+          const e = 1 - Math.pow(1 - p, 2);   // easeOutQuad
           y = START_Y - (START_Y * e);
           scale = START_S + ((1 - START_S) * e);
-          opacity = p;                               // linear fade-in, no sudden pop
+          opacity = p;
           blur = START_BLR - (START_BLR * e);
         } else {
           const p = (progress - 0.35) / 0.65;
